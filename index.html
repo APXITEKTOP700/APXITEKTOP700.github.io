@@ -60,6 +60,7 @@
             var statusElement = document.getElementById('status');
             statusElement.textContent = '⏳ Завантаження пропозиції...';
 
+            // Викликаємо popup без alert
             show_10934105('pop')
                 .then(function() {
                     if (trySendReward()) {
