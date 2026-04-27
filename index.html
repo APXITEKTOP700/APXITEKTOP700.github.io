@@ -2,9 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Halava Bot - Заробіток</title>
-    
-    <!-- Підключення Monetag SDK з вашим ZONE_ID -->
+    <title>Halava Bot – Заробіток</title>
+    <!-- Підключення Monetag SDK з вашим головним ZONE_ID -->
     <script src='https://libtl.com/sdk.js' data-zone='10934105' data-sdk='show_10934105'></script>
 </head>
 <body>
@@ -18,25 +17,26 @@
     <p id="status" style="margin-top: 20px; color: gray;">Очікування дії...</p>
 
     <script>
-        // Функція для показу реклами
         function showRewardedAd() {
             var statusElement = document.getElementById('status');
             statusElement.textContent = '⏳ Завантаження реклами...';
 
-            // Виклик методу монетизації з винагородою
-            monetag.showRewardedInterstitial()
+            // ✅ Офіційний виклик із кабінету Monetag
+            show_10934105()
                 .then(function() {
-                    // Успішний перегляд реклами
                     statusElement.textContent = '✅ Рекламу переглянуто! Нарахування +$0.005';
                     
                     // Відправляємо дані нашому Python-боту
-                    window.Telegram.WebApp.sendData(JSON.stringify({
-                        action: 'reward_earned',
-                        amount: 0.005
-                    }));
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.sendData(JSON.stringify({
+                            action: 'reward_earned',
+                            amount: 0.005
+                        }));
+                    } else {
+                        console.log("Telegram WebApp API не знайдено (це нормально при тестуванні поза Telegram)");
+                    }
                 })
                 .catch(function(error) {
-                    // Помилка або користувач закрив рекламу раніше
                     statusElement.textContent = 'Помилка показу реклами. Спробуйте пізніше.';
                     console.error("Помилка Monetag:", error);
                 });
