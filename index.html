@@ -22,22 +22,21 @@
 
             show_10934105()
                 .then(function() {
-                    statusElement.textContent = '✅ Рекламу переглянуто! Надсилаю винагороду...';
+                    statusElement.textContent = '✅ Рекламу переглянуто! Надсилаю...';
                     
-                    if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                    // Завжди намагаємося надіслати, навіть якщо API немає (тоді буде помилка)
+                    try {
                         window.Telegram.WebApp.sendData(JSON.stringify({
                             action: 'reward_earned',
                             amount: 0.005
                         }));
-                        statusElement.textContent = '✅ Винагороду надіслано боту!';
-                    } else {
-                        statusElement.textContent = '❌ Помилка: відкрийте через кнопку "Заробити" в боті';
-                        console.error('Telegram WebApp API недоступний');
+                        statusElement.textContent = '✅ Винагороду надіслано! Перевірте чат бота.';
+                    } catch (e) {
+                        statusElement.textContent = '❌ Не вдалося надіслати винагороду. ' + e.message;
                     }
                 })
                 .catch(function(error) {
-                    statusElement.textContent = 'Помилка показу реклами. Спробуйте пізніше.';
-                    console.error("Помилка Monetag:", error);
+                    statusElement.textContent = 'Помилка показу реклами: ' + error;
                 });
         }
     </script>
