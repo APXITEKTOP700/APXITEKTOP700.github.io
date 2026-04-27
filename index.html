@@ -24,16 +24,14 @@
                 .then(function() {
                     statusElement.textContent = '✅ Рекламу переглянуто! Надсилаю винагороду...';
                     
-                    // Перевіряємо, чи доступний Telegram WebApp API
                     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-                        // Надсилаємо дані боту
                         window.Telegram.WebApp.sendData(JSON.stringify({
                             action: 'reward_earned',
                             amount: 0.005
                         }));
                         statusElement.textContent = '✅ Винагороду надіслано боту!';
                     } else {
-                        statusElement.textContent = '❌ Помилка: Telegram WebApp API не знайдено. Відкрийте через бота.';
+                        statusElement.textContent = '❌ Помилка: відкрийте через кнопку "Заробити" в боті';
                         console.error('Telegram WebApp API недоступний');
                     }
                 })
