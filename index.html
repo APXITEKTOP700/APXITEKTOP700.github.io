@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Halava Bot – Заробіток</title>
-    <!-- Підключення Monetag SDK з вашим ZONE_ID -->
     <script src='https://libtl.com/sdk.js' data-zone='10934105' data-sdk='show_10934105'></script>
 </head>
 <body>
@@ -21,19 +20,21 @@
             var statusElement = document.getElementById('status');
             statusElement.textContent = '⏳ Завантаження реклами...';
 
-            // Викликаємо рекламу Monetag
             show_10934105()
                 .then(function() {
-                    statusElement.textContent = '✅ Рекламу переглянуто! Нарахування +$0.005';
+                    statusElement.textContent = '✅ Рекламу переглянуто! Надсилаю винагороду...';
                     
-                    // Відправляємо дані нашому Python-боту
-                    if (window.Telegram && window.Telegram.WebApp) {
+                    // Перевіряємо, чи доступний Telegram WebApp API
+                    if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                        // Надсилаємо дані боту
                         window.Telegram.WebApp.sendData(JSON.stringify({
                             action: 'reward_earned',
                             amount: 0.005
                         }));
+                        statusElement.textContent = '✅ Винагороду надіслано боту!';
                     } else {
-                        console.log("Telegram WebApp API не знайдено");
+                        statusElement.textContent = '❌ Помилка: Telegram WebApp API не знайдено. Відкрийте через бота.';
+                        console.error('Telegram WebApp API недоступний');
                     }
                 })
                 .catch(function(error) {
