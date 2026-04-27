@@ -3,40 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <title>Halava Bot – Заробіток</title>
+    <!-- Підключення Monetag SDK з вашим ZONE_ID -->
     <script src='https://libtl.com/sdk.js' data-zone='10934105' data-sdk='show_10934105'></script>
 </head>
 <body>
     <h1>🎁 Halava Bot</h1>
     <p>Заробляйте токени за перегляд реклами!</p>
     
-    <button onclick="showRewardedAd()" style="padding: 15px 30px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+    <!-- Кнопка для Rewarded Interstitial -->
+    <button onclick="showRewardedAd()" style="padding: 15px 30px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-bottom: 10px;">
         🎥 Дивитись рекламу (+$0.005)
+    </button>
+    
+    <!-- Кнопка для Rewarded Popup -->
+    <button onclick="showRewardedPopup()" style="padding: 15px 30px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+        🚀 Швидкий бонус (+$0.005)
     </button>
 
     <p id="status" style="margin-top: 20px; color: gray;">Очікування дії...</p>
 
     <script>
+        // Функція, яка намагається надіслати винагороду боту
+        function trySendReward() {
+            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({
+                    action: 'reward_earned',
+                    amount: 0.005
+                }));
+                return true;
+            }
+            return false;
+        }
+
+        // Interstitial
         function showRewardedAd() {
             var statusElement = document.getElementById('status');
             statusElement.textContent = '⏳ Завантаження реклами...';
 
             show_10934105()
                 .then(function() {
-                    statusElement.textContent = '✅ Рекламу переглянуто! Надсилаю...';
-                    
-                    // Завжди намагаємося надіслати, навіть якщо API немає (тоді буде помилка)
-                    try {
-                        window.Telegram.WebApp.sendData(JSON.stringify({
-                            action: 'reward_earned',
-                            amount: 0.005
-                        }));
-                        statusElement.textContent = '✅ Винагороду надіслано! Перевірте чат бота.';
-                    } catch (e) {
-                        statusElement.textContent = '❌ Не вдалося надіслати винагороду. ' + e.message;
+                    if (trySendReward()) {
+                        statusElement.textContent = '✅ Рекламу переглянуто! Надсилаю винагороду...';
+                    } else {
+                        statusElement.textContent = '❌ Помилка: відкрийте через кнопку "Заробити" в боті';
+                        console.error('Telegram WebApp API недоступний');
                     }
                 })
                 .catch(function(error) {
-                    statusElement.textContent = 'Помилка показу реклами: ' + error;
+                    statusElement.textContent = 'Помилка показу реклами. Спробуйте пізніше.';
+                    console.error("Помилка Monetag Interstitial:", error);
+                });
+        }
+
+        // Popup
+        function showRewardedPopup() {
+            var statusElement = document.getElementById('status');
+            statusElement.textContent = '⏳ Завантаження пропозиції...';
+
+            show_10934105('pop')
+                .then(function() {
+                    if (trySendReward()) {
+                        statusElement.textContent = '✅ Бонус зараховано! Перевірте чат бота.';
+                    } else {
+                        statusElement.textContent = '❌ Помилка: відкрийте через кнопку "Заробити" в боті';
+                        console.error('Telegram WebApp API недоступний');
+                    }
+                })
+                .catch(function(error) {
+                    statusElement.textContent = 'Помилка отримання бонусу. Спробуйте пізніше.';
+                    console.error("Помилка Monetag Popup:", error);
                 });
         }
     </script>
