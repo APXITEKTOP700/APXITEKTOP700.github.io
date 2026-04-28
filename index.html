@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Halava Bot – Заробіток</title>
-    <!-- Підключення Monetag SDK з вашим ZONE_ID -->
     <script src='https://libtl.com/sdk.js' data-zone='10934105' data-sdk='show_10934105'></script>
 </head>
 <body>
@@ -12,60 +11,42 @@
     
     <!-- Кнопка 1: Rewarded Interstitial -->
     <button onclick="showRewardedAd()" style="padding: 15px 30px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-bottom: 10px;">
-        🎥 Дивитись рекламу (+$0.005)
+        🎥 Дивитись рекламу (+$0.01)
     </button>
     
     <!-- Кнопка 2: Rewarded Popup -->
-    <button onclick="showRewardedPopup()" style="padding: 15px 30px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-bottom: 10px;">
-        🚀 Швидкий бонус (+$0.005)
-    </button>
-
-    <!-- Кнопка 3: In-App Interstitial (ручний запуск) -->
-    <button onclick="showInAppAd()" style="padding: 15px 30px; background-color: #ffc107; color: black; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
-        📢 Пасивна реклама (+$0.005)
+    <button onclick="showRewardedPopup()" style="padding: 15px 30px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+        🚀 Швидкий бонус (+$0.01)
     </button>
 
     <p id="status" style="margin-top: 20px; color: gray;">Очікування дії...</p>
 
     <script>
-        // ========== АВТОМАТИЧНИЙ In-App Interstitial ==========
-        // Запускається один раз після завантаження сторінки
-        (function() {
-            try {
-                show_10934105({
-                    type: 'inApp',
-                    inAppSettings: {
-                        frequency: 2,      // 2 реклами
-                        capping: 0.1,      // за 0.1 години (6 хвилин)
-                        interval: 30,      // інтервал між банерами 30 секунд
-                        timeout: 5,        // затримка перед першим показом 5 секунд
-                        everyPage: false   // не скидати сесію при переходах
-                    }
-                });
-            } catch (e) {
-                console.log("In-app interstitial auto start:", e);
-            }
-        })();
-
-        // ========== ФУНКЦІЯ НАДСИЛАННЯ ВИНАГОРОДИ ==========
-        function trySendReward() {
+        // Функція надсилання винагороди (тепер приймає суму)
+        function trySendReward(amount = 0.005) {
             if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
                 window.Telegram.WebApp.sendData(JSON.stringify({
                     action: 'reward_earned',
-                    amount: 0.005
+                    amount: amount
                 }));
                 return true;
             }
             return false;
         }
 
-        // ========== КНОПКА 1: REWARDED INTERSTITIAL ==========
+        // Кнопка 1: Interstitial + пасивний бонус
         function showRewardedAd() {
             document.getElementById('status').textContent = '⏳ Завантаження реклами...';
             show_10934105()
                 .then(function() {
-                    if (trySendReward()) {
-                        document.getElementById('status').textContent = '✅ Винагороду надіслано боту!';
+                    let success = true;
+                    // Основний бонус за перегляд Interstitial
+                    if (!trySendReward(0.005)) success = false;
+                    // Додатковий бонус за "пасивний" перегляд
+                    if (!trySendReward(0.005)) success = false;
+
+                    if (success) {
+                        document.getElementById('status').textContent = '✅ Винагороду надіслано боту! (+$0.01)';
                     } else {
                         document.getElementById('status').textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
                     }
@@ -76,13 +57,19 @@
                 });
         }
 
-        // ========== КНОПКА 2: REWARDED POPUP ==========
+        // Кнопка 2: Popup + пасивний бонус
         function showRewardedPopup() {
             document.getElementById('status').textContent = '⏳ Завантаження пропозиції...';
             show_10934105('pop')
                 .then(function() {
-                    if (trySendReward()) {
-                        document.getElementById('status').textContent = '✅ Бонус зараховано! Перевірте чат.';
+                    let success = true;
+                    // Основний бонус за Popup
+                    if (!trySendReward(0.005)) success = false;
+                    // Додатковий бонус за "пасивний" перегляд
+                    if (!trySendReward(0.005)) success = false;
+
+                    if (success) {
+                        document.getElementById('status').textContent = '✅ Бонус зараховано! Перевірте чат. (+$0.01)';
                     } else {
                         document.getElementById('status').textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
                     }
@@ -91,34 +78,6 @@
                     document.getElementById('status').textContent = 'Помилка отримання бонусу.';
                     console.error(error);
                 });
-        }
-
-        // ========== КНОПКА 3: In-App INTERSTITIAL (ручний виклик) ==========
-        function showInAppAd() {
-            document.getElementById('status').textContent = '⏳ Запуск пасивної реклами...';
-            try {
-                show_10934105({
-                    type: 'inApp',
-                    inAppSettings: {
-                        frequency: 1,      // показати 1 рекламу зараз
-                        capping: 0.01,     // майже без обмежень
-                        interval: 5,
-                        timeout: 1,
-                        everyPage: true    // скидати сесію, щоб показувати заново кожного разу
-                    }
-                });
-                // Оскільки In-App не повертає проміс, просто імітуємо успіх
-                document.getElementById('status').textContent = '✅ Пасивну рекламу запущено! Чекайте на банери.';
-                // Надсилаємо нагороду одразу (або можна чекати подію, але SDK не дає колбеку)
-                if (trySendReward()) {
-                    document.getElementById('status').textContent = '✅ Винагороду надіслано боту!';
-                } else {
-                    document.getElementById('status').textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
-                }
-            } catch (e) {
-                document.getElementById('status').textContent = 'Помилка пасивної реклами.';
-                console.error(e);
-            }
         }
     </script>
 </body>
