@@ -10,32 +10,41 @@
     <h1>🎁 Halava Bot</h1>
     <p>Заробляйте токени за перегляд реклами!</p>
     
-    <!-- Кнопка для Rewarded Interstitial -->
+    <!-- Кнопка 1: Rewarded Interstitial -->
     <button onclick="showRewardedAd()" style="padding: 15px 30px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-bottom: 10px;">
         🎥 Дивитись рекламу (+$0.005)
     </button>
     
-    <!-- Кнопка для Rewarded Popup -->
-    <button onclick="showRewardedPopup()" style="padding: 15px 30px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+    <!-- Кнопка 2: Rewarded Popup -->
+    <button onclick="showRewardedPopup()" style="padding: 15px 30px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-bottom: 10px;">
         🚀 Швидкий бонус (+$0.005)
+    </button>
+
+    <!-- Кнопка 3: In-App Interstitial (ручний запуск) -->
+    <button onclick="showInAppAd()" style="padding: 15px 30px; background-color: #ffc107; color: black; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
+        📢 Пасивна реклама (+$0.005)
     </button>
 
     <p id="status" style="margin-top: 20px; color: gray;">Очікування дії...</p>
 
     <script>
-        // ========== НАЛАШТУВАННЯ In-App Interstitial ==========
-        // Автоматично запускається після завантаження сторінки
+        // ========== АВТОМАТИЧНИЙ In-App Interstitial ==========
+        // Запускається один раз після завантаження сторінки
         (function() {
-            show_10934105({
-                type: 'inApp',
-                inAppSettings: {
-                    frequency: 2,      // Показати 2 реклами
-                    capping: 0.1,      // За 0.1 години (6 хвилин)
-                    interval: 30,      // Інтервал між рекламами 30 секунд
-                    timeout: 5,        // Затримка перед першим показом 5 секунд
-                    everyPage: false   // Не скидати сесію при переході між сторінками
-                }
-            });
+            try {
+                show_10934105({
+                    type: 'inApp',
+                    inAppSettings: {
+                        frequency: 2,      // 2 реклами
+                        capping: 0.1,      // за 0.1 години (6 хвилин)
+                        interval: 30,      // інтервал між банерами 30 секунд
+                        timeout: 5,        // затримка перед першим показом 5 секунд
+                        everyPage: false   // не скидати сесію при переходах
+                    }
+                });
+            } catch (e) {
+                console.log("In-app interstitial auto start:", e);
+            }
         })();
 
         // ========== ФУНКЦІЯ НАДСИЛАННЯ ВИНАГОРОДИ ==========
@@ -50,7 +59,7 @@
             return false;
         }
 
-        // ========== REWARDED INTERSTITIAL ==========
+        // ========== КНОПКА 1: REWARDED INTERSTITIAL ==========
         function showRewardedAd() {
             document.getElementById('status').textContent = '⏳ Завантаження реклами...';
             show_10934105()
@@ -67,7 +76,7 @@
                 });
         }
 
-        // ========== REWARDED POPUP ==========
+        // ========== КНОПКА 2: REWARDED POPUP ==========
         function showRewardedPopup() {
             document.getElementById('status').textContent = '⏳ Завантаження пропозиції...';
             show_10934105('pop')
@@ -82,6 +91,34 @@
                     document.getElementById('status').textContent = 'Помилка отримання бонусу.';
                     console.error(error);
                 });
+        }
+
+        // ========== КНОПКА 3: In-App INTERSTITIAL (ручний виклик) ==========
+        function showInAppAd() {
+            document.getElementById('status').textContent = '⏳ Запуск пасивної реклами...';
+            try {
+                show_10934105({
+                    type: 'inApp',
+                    inAppSettings: {
+                        frequency: 1,      // показати 1 рекламу зараз
+                        capping: 0.01,     // майже без обмежень
+                        interval: 5,
+                        timeout: 1,
+                        everyPage: true    // скидати сесію, щоб показувати заново кожного разу
+                    }
+                });
+                // Оскільки In-App не повертає проміс, просто імітуємо успіх
+                document.getElementById('status').textContent = '✅ Пасивну рекламу запущено! Чекайте на банери.';
+                // Надсилаємо нагороду одразу (або можна чекати подію, але SDK не дає колбеку)
+                if (trySendReward()) {
+                    document.getElementById('status').textContent = '✅ Винагороду надіслано боту!';
+                } else {
+                    document.getElementById('status').textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
+                }
+            } catch (e) {
+                document.getElementById('status').textContent = 'Помилка пасивної реклами.';
+                console.error(e);
+            }
         }
     </script>
 </body>
