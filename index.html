@@ -2,82 +2,92 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Halava Bot – Заробіток</title>
+    <title>Halava Game</title>
     <script src='https://libtl.com/sdk.js' data-zone='10934105' data-sdk='show_10934105'></script>
+    <style>
+        body { font-family: Arial; text-align: center; }
+        .tap-btn { width: 120px; height: 120px; border-radius: 50%; background: gold; font-size: 24px; border: none; cursor: pointer; margin: 20px auto; display: block; }
+        .action-btn { padding: 15px 30px; margin: 10px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
+        .wheel-btn { background: #ff5722; color: white; }
+        .convert-btn { background: #9c27b0; color: white; }
+        .ad-btn { background: #28a745; color: white; }
+        .popup-btn { background: #007bff; color: white; }
+    </style>
 </head>
 <body>
-    <h1>🎁 Halava Bot</h1>
-    <p>Заробляйте токени за перегляд реклами!</p>
-    
-    <!-- Кнопка 1: Rewarded Interstitial -->
-    <button onclick="showRewardedAd()" style="padding: 15px 30px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-bottom: 10px;">
-        🎥 Дивитись рекламу (+$0.01)
-    </button>
-    
-    <!-- Кнопка 2: Rewarded Popup -->
-    <button onclick="showRewardedPopup()" style="padding: 15px 30px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer;">
-        🚀 Швидкий бонус (+$0.01)
-    </button>
+    <h1>Halava Game 🎮</h1>
+    <p>🪙 Монети: <span id="coins">0</span></p>
+    <p>💎 Токени: <span id="tokens">0</span></p>
+    <p>💰 Token3: <span id="token3">0</span></p>
 
-    <p id="status" style="margin-top: 20px; color: gray;">Очікування дії...</p>
+    <!-- Тапалка -->
+    <button class="tap-btn" onclick="tap()">👆<br>TAP</button>
+
+    <!-- Колесо -->
+    <button class="action-btn wheel-btn" onclick="spinWheel()">🎰 Колесо фортуни (10 🪙)</button>
+
+    <!-- Конвертація -->
+    <button class="action-btn convert-btn" onclick="convert()">🔄 Конвертувати в Token3<br>(1000🪙 + 1💎 = 0.1💰)</button>
+
+    <!-- Реклама -->
+    <button class="action-btn ad-btn" onclick="showRewardedAd()">🎥 Дивитись рекламу (+$0.005)</button>
+    <button class="action-btn popup-btn" onclick="showRewardedPopup()">🚀 Швидкий бонус (+$0.005)</button>
+
+    <p id="status"></p>
 
     <script>
-        // Функція надсилання винагороди (тепер приймає суму)
-        function trySendReward(amount = 0.005) {
-            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify({
-                    action: 'reward_earned',
-                    amount: amount
-                }));
+        function sendToBot(data) {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify(data));
                 return true;
             }
             return false;
         }
 
-        // Кнопка 1: Interstitial + пасивний бонус
+        function tap() {
+            if (sendToBot({ action: 'tap' })) {
+                let c = document.getElementById('coins');
+                c.textContent = parseInt(c.textContent) + 1;
+            } else showError();
+        }
+        function spinWheel() {
+            if (sendToBot({ action: 'wheel_spin' })) {
+                document.getElementById('status').textContent = '🎰 Обертаємо...';
+            } else showError();
+        }
+        function convert() {
+            if (sendToBot({ action: 'convert' })) {
+                document.getElementById('status').textContent = '🔄 Конвертуємо...';
+            } else showError();
+        }
         function showRewardedAd() {
             document.getElementById('status').textContent = '⏳ Завантаження реклами...';
             show_10934105()
-                .then(function() {
-                    let success = true;
-                    // Основний бонус за перегляд Interstitial
-                    if (!trySendReward(0.005)) success = false;
-                    // Додатковий бонус за "пасивний" перегляд
-                    if (!trySendReward(0.005)) success = false;
-
-                    if (success) {
-                        document.getElementById('status').textContent = '✅ Винагороду надіслано боту! (+$0.01)';
-                    } else {
-                        document.getElementById('status').textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
-                    }
+                .then(() => {
+                    if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
+                        document.getElementById('status').textContent = '✅ Токени зараховано!';
+                    } else showError();
                 })
-                .catch(function(error) {
-                    document.getElementById('status').textContent = 'Помилка показу реклами.';
-                    console.error(error);
+                .catch(err => {
+                    document.getElementById('status').textContent = 'Помилка реклами.';
+                    console.error(err);
                 });
         }
-
-        // Кнопка 2: Popup + пасивний бонус
         function showRewardedPopup() {
             document.getElementById('status').textContent = '⏳ Завантаження пропозиції...';
             show_10934105('pop')
-                .then(function() {
-                    let success = true;
-                    // Основний бонус за Popup
-                    if (!trySendReward(0.005)) success = false;
-                    // Додатковий бонус за "пасивний" перегляд
-                    if (!trySendReward(0.005)) success = false;
-
-                    if (success) {
-                        document.getElementById('status').textContent = '✅ Бонус зараховано! Перевірте чат. (+$0.01)';
-                    } else {
-                        document.getElementById('status').textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
-                    }
+                .then(() => {
+                    if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
+                        document.getElementById('status').textContent = '✅ Бонус зараховано!';
+                    } else showError();
                 })
-                .catch(function(error) {
-                    document.getElementById('status').textContent = 'Помилка отримання бонусу.';
-                    console.error(error);
+                .catch(err => {
+                    document.getElementById('status').textContent = 'Помилка бонусу.';
+                    console.error(err);
                 });
+        }
+        function showError() {
+            document.getElementById('status').textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
         }
     </script>
 </body>
