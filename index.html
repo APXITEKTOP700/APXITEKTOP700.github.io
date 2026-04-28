@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Halava Game</title>
-    <!-- Підключення Monetag SDK -->
     <script src='https://libtl.com/sdk.js' data-zone='10934105' data-sdk='show_10934105'></script>
     <style>
         body { font-family: Arial; text-align: center; }
@@ -21,66 +20,47 @@
     <p>💎 Токени: <span id="tokens">0</span></p>
     <p>💰 Token3: <span id="token3">0</span></p>
 
-    <!-- Тапалка -->
     <button class="tap-btn" onclick="tap()">👆<br>TAP</button>
-
-    <!-- Колесо фортуни -->
     <button class="action-btn wheel-btn" onclick="spinWheel()">🎰 Колесо фортуни (10 🪙)</button>
-
-    <!-- Конвертація валют -->
     <button class="action-btn convert-btn" onclick="convert()">🔄 Конвертувати в Token3<br>(1000🪙 + 1💎 = 0.1💰)</button>
-
-    <!-- Реклама -->
     <button class="action-btn ad-btn" onclick="showRewardedAd()">🎥 Дивитись рекламу (+$0.005)</button>
     <button class="action-btn popup-btn" onclick="showRewardedPopup()">🚀 Швидкий бонус (+$0.005)</button>
 
-    <!-- Діагностичний статус -->
     <p id="status" style="margin-top:20px; color:gray;">Очікування дії...</p>
 
     <script>
-        // Функція для безпечної відправки даних в бота через Telegram WebApp API
         function sendToBot(data) {
             var statusEl = document.getElementById('status');
-            // Перевіряємо, чи доступний об'єкт Telegram.WebApp
             if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
                 try {
                     window.Telegram.WebApp.sendData(JSON.stringify(data));
                     statusEl.textContent = '✅ Дані надіслано до бота';
                     return true;
                 } catch (e) {
-                    statusEl.textContent = '❌ Помилка при надсиланні даних: ' + e.message;
+                    statusEl.textContent = '❌ Помилка надсилання: ' + e.message;
                     console.error(e);
                     return false;
                 }
             } else {
-                statusEl.textContent = '❌ Помилка: відкрийте через кнопку "Заробити" в боті';
+                statusEl.textContent = '❌ Відкрийте через кнопку "Заробити" в боті';
                 return false;
             }
         }
-
-        // 1. Тапалка
         function tap() {
             document.getElementById('status').textContent = '👆 Тап...';
             if (sendToBot({ action: 'tap' })) {
-                // Оптимістично оновлюємо лічильник на екрані
-                var coinsSpan = document.getElementById('coins');
-                coinsSpan.textContent = parseInt(coinsSpan.textContent) + 1;
+                var c = document.getElementById('coins');
+                c.textContent = parseInt(c.textContent) + 1;
             }
         }
-
-        // 2. Колесо фортуни
         function spinWheel() {
             document.getElementById('status').textContent = '🎰 Обертаємо...';
             sendToBot({ action: 'wheel_spin' });
         }
-
-        // 3. Конвертація валют
         function convert() {
             document.getElementById('status').textContent = '🔄 Конвертуємо...';
             sendToBot({ action: 'convert' });
         }
-
-        // 4. Реклама Interstitial
         function showRewardedAd() {
             document.getElementById('status').textContent = '⏳ Завантаження реклами...';
             show_10934105()
@@ -94,8 +74,6 @@
                     console.error(err);
                 });
         }
-
-        // 5. Реклама Popup
         function showRewardedPopup() {
             document.getElementById('status').textContent = '⏳ Завантаження пропозиції...';
             show_10934105('pop')
