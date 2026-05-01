@@ -28,8 +28,10 @@
     <button class="action-btn wheel-btn" onclick="spinWheel()">🎰 Колесо фортуни (10 🪙)</button>
     <button class="action-btn convert-btn" onclick="convert()">🔄 Конвертувати в Token3<br>(1🪙 + 1💎 = 0.1💰)</button>
     
+    <!-- RichAds кнопка -->
     <button class="action-btn richads-btn" onclick="showRichAd()">🤑 RichAds Бонус (+$0.005)</button>
 
+    <!-- Monetag кнопки -->
     <button class="action-btn ad-btn" onclick="showRewardedAd()">🎥 Дивитись рекламу (+$0.005)</button>
     <button class="action-btn popup-btn" onclick="showRewardedPopup()">🚀 Швидкий бонус (+$0.005)</button>
 
@@ -43,6 +45,7 @@
             appId: "7288",
         });
 
+        // Допоміжна функція надсилання даних боту
         function sendToBot(data) {
             var s = document.getElementById('status');
             if (window.Telegram && window.Telegram.WebApp) {
@@ -60,59 +63,86 @@
             }
         }
 
+        // Функція показу RichAds з очікуванням готовності
         function showRichAd() {
-            document.getElementById('status').textContent = '⏳ Завантаження RichAds...';
-            if (window.TelegramAdsController && window.TelegramAdsController.show) {
-                window.TelegramAdsController.show()
-                    .then(() => {
-                        if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
-                            document.getElementById('status').textContent = '✅ RichAds бонус зараховано!';
-                        }
-                    })
-                    .catch(err => {
-                        document.getElementById('status').textContent = 'Помилка RichAds: ' + err;
-                        console.error(err);
-                    });
-            } else {
-                document.getElementById('status').textContent = 'RichAds ще не готовий, спробуйте пізніше';
+            var statusEl = document.getElementById('status');
+            statusEl.textContent = '⏳ Завантаження RichAds...';
+            
+            var attempts = 0;
+            var maxAttempts = 20; // спробувати 20 разів (10 секунд)
+            
+            function tryShow() {
+                if (window.TelegramAdsController && typeof window.TelegramAdsController.show === 'function') {
+                    window.TelegramAdsController.show()
+                        .then(function() {
+                            if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
+                                statusEl.textContent = '✅ RichAds бонус зараховано!';
+                            }
+                        })
+                        .catch(function(err) {
+                            statusEl.textContent = 'Помилка RichAds: ' + err;
+                            console.error(err);
+                        });
+                } else if (attempts < maxAttempts) {
+                    attempts++;
+                    setTimeout(tryShow, 500); // чекаємо 0.5 секунди
+                } else {
+                    statusEl.textContent = 'RichAds не готовий. Оновіть сторінку та спробуйте пізніше.';
+                }
             }
+            
+            tryShow();
         }
 
+        // Тапалка
         function tap() {
             document.getElementById('status').textContent = '👆 Тап...';
             if (sendToBot({ action: 'tap' })) {
-                let c = document.getElementById('coins'); c.textContent = parseInt(c.textContent) + 1;
+                let c = document.getElementById('coins');
+                c.textContent = parseInt(c.textContent) + 1;
             }
         }
+
+        // Колесо фортуни
         function spinWheel() {
             document.getElementById('status').textContent = '🎰 Обертаємо...';
             sendToBot({ action: 'wheel_spin' });
         }
+
+        // Конвертація валют
         function convert() {
             document.getElementById('status').textContent = '🔄 Конвертуємо...';
             sendToBot({ action: 'convert' });
         }
+
+        // Monetag Interstitial
         function showRewardedAd() {
             document.getElementById('status').textContent = '⏳ Завантаження реклами Monetag...';
-            show_10934105().then(() => {
-                if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
-                    document.getElementById('status').textContent = '✅ Токени зараховано!';
-                }
-            }).catch(err => {
-                document.getElementById('status').textContent = 'Помилка: ' + err;
-                console.error(err);
-            });
+            show_10934105()
+                .then(function() {
+                    if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
+                        document.getElementById('status').textContent = '✅ Токени зараховано!';
+                    }
+                })
+                .catch(function(err) {
+                    document.getElementById('status').textContent = 'Помилка: ' + err;
+                    console.error(err);
+                });
         }
+
+        // Monetag Popup
         function showRewardedPopup() {
             document.getElementById('status').textContent = '⏳ Завантаження пропозиції...';
-            show_10934105('pop').then(() => {
-                if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
-                    document.getElementById('status').textContent = '✅ Бонус зараховано!';
-                }
-            }).catch(err => {
-                document.getElementById('status').textContent = 'Помилка: ' + err;
-                console.error(err);
-            });
+            show_10934105('pop')
+                .then(function() {
+                    if (sendToBot({ action: 'reward_earned', amount: 0.005 })) {
+                        document.getElementById('status').textContent = '✅ Бонус зараховано!';
+                    }
+                })
+                .catch(function(err) {
+                    document.getElementById('status').textContent = 'Помилка: ' + err;
+                    console.error(err);
+                });
         }
     </script>
 </body>
