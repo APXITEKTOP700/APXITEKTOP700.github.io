@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Halava Game</title>
-    <!-- Monetag -->
+    <!-- Monetag SDK -->
     <script src='https://libtl.com/sdk.js' data-zone='10934105' data-sdk='show_10934105'></script>
-    <!-- RichAds -->
+    <!-- RichAds SDK -->
     <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
     <style>
         body { font-family: Arial; text-align: center; margin: 0; padding: 10px; }
@@ -15,7 +15,7 @@
         .convert-btn { background: #9c27b0; color: white; }
         .ad-btn { background: #28a745; color: white; }
         .popup-btn { background: #007bff; color: white; }
-        .richads-btn { background: #FF8C00; color: white; } /* Помаранчева для RichAds */
+        .richads-btn { background: #FF8C00; color: white; }
     </style>
 </head>
 <body>
@@ -28,24 +28,22 @@
     <button class="action-btn wheel-btn" onclick="spinWheel()">🎰 Колесо фортуни (10 🪙)</button>
     <button class="action-btn convert-btn" onclick="convert()">🔄 Конвертувати в Token3<br>(1🪙 + 1💎 = 0.1💰)</button>
     
-    <!-- 🔥 НОВА КНОПКА ДЛЯ RICHADS -->
+    <!-- 🔥 НОВА КНОПКА RICHADS -->
     <button class="action-btn richads-btn" onclick="showRichAd()">🤑 RichAds Бонус (+$0.005)</button>
 
-    <!-- Інша реклама -->
     <button class="action-btn ad-btn" onclick="showRewardedAd()">🎥 Дивитись рекламу (+$0.005)</button>
     <button class="action-btn popup-btn" onclick="showRewardedPopup()">🚀 Швидкий бонус (+$0.005)</button>
 
     <p id="status" style="margin-top:20px; color:gray;">Очікування дії...</p>
 
     <script>
-        // === Ініціалізація RichAds ===
+        // Ініціалізація RichAds
         window.TelegramAdsController = new TelegramAdsController();
         window.TelegramAdsController.initialize({
             pubId: "1010302",
             appId: "7288",
         });
 
-        // === Допоміжна функція ===
         function sendToBot(data) {
             var s = document.getElementById('status');
             if (window.Telegram && window.Telegram.WebApp) {
@@ -63,7 +61,7 @@
             }
         }
 
-        // === НОВА ФУНКЦІЯ ДЛЯ RICHADS ===
+        // RichAds
         function showRichAd() {
             document.getElementById('status').textContent = '⏳ Завантаження RichAds...';
             if (window.TelegramAdsController && window.TelegramAdsController.show) {
@@ -82,7 +80,6 @@
             }
         }
 
-        // Старі функції лишаються без змін
         function tap() {
             document.getElementById('status').textContent = '👆 Тап...';
             if (sendToBot({ action: 'tap' })) {
